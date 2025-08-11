@@ -15,6 +15,9 @@ interface SlideshowPlayerProps {
 export default function SlideshowPlayer({ slides, currentIndex, onCurrentIndexChange }: SlideshowPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const overlayRef = useRef<HTMLDivElement | null>(null);
+  const [overlayPos, setOverlayPos] = useState<{ x: number; y: number } | null>(null);
+  const [dragging, setDragging] = useState(false);
 
   const current = useMemo(() => slides[currentIndex], [slides, currentIndex]);
 
@@ -34,6 +37,56 @@ export default function SlideshowPlayer({ slides, currentIndex, onCurrentIndexCh
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [currentIndex, isPlaying]);
+
+  useEffect(() => {
+    if (!overlayRef.current || overlayPos) return;
+    const parent = overlayRef.current.parentElement;
+    if (!parent) return;
+    const pr = parent.getBoundingClientRect();
+    const or = overlayRef.current.getBoundingClientRect();
+    setOverlayPos({ x: 16, y: Math.max(16, pr.height - or.height - 16) });
+  }, [overlayPos, currentIndex]);
+
+  useEffect(() => {
+    function handleResize() {
+      if (!overlayRef.current || !overlayPos) return;
+      const parent = overlayRef.current.parentElement?.getBoundingClientRect();
+      const or = overlayRef.current.getBoundingClientRect();
+      if (!parent) return;
+      setOverlayPos({
+        x: Math.min(Math.max(0, overlayPos.x), parent.width - or.width),
+        y: Math.min(Math.max(0, overlayPos.y), parent.height - or.height),
+      });
+    }
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [overlayPos]);
+
+  function onOverlayPointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const start = overlayPos ?? { x: 16, y: 16 };
+    const parentRect = overlayRef.current?.parentElement?.getBoundingClientRect();
+    const overlayRect = overlayRef.current?.getBoundingClientRect();
+    if (!parentRect || !overlayRect) return;
+    setDragging(true);
+    const onMove = (ev: PointerEvent) => {
+      const dx = ev.clientX - startX;
+      const dy = ev.clientY - startY;
+      let nx = start.x + dx;
+      let ny = start.y + dy;
+      nx = Math.max(0, Math.min(nx, parentRect.width - overlayRect.width));
+      ny = Math.max(0, Math.min(ny, parentRect.height - overlayRect.height));
+      setOverlayPos({ x: nx, y: ny });
+    };
+    const onUp = () => {
+      setDragging(false);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+  }
 
   function togglePlay() {
     setIsPlaying((p) => !p);
@@ -58,7 +111,12 @@ export default function SlideshowPlayer({ slides, currentIndex, onCurrentIndexCh
             className="h-full w-full object-contain bg-card"
           />
 
-          <div className="pointer-events-auto absolute left-4 bottom-4 z-10">
+          <div
+            ref={overlayRef}
+            onPointerDown={onOverlayPointerDown}
+            className="pointer-events-auto absolute z-10 select-none"
+            style={{ left: overlayPos?.x ?? 16, top: overlayPos?.y ?? 16, cursor: dragging ? "grabbing" : "grab" }}
+          >
             <div className="rounded-md border bg-card/90 backdrop-blur p-2 shadow-md">
               <video
                 ref={videoRef}

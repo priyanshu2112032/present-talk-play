@@ -4,17 +4,17 @@ import { Drawer, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle, DrawerT
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "@/hooks/use-toast";
-import { EFFECTIVE_BACKEND_URL } from "@/config";
 import type { SlideAsset } from "@/types";
 
 interface ChatbotDrawerProps {
   slides: SlideAsset[];
   currentIndex: number;
+  backendUrl: string;
 }
 
 type Msg = { role: "user" | "assistant"; content: string };
 
-export default function ChatbotDrawer({ slides, currentIndex }: ChatbotDrawerProps) {
+export default function ChatbotDrawer({ slides, currentIndex, backendUrl }: ChatbotDrawerProps) {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -30,7 +30,7 @@ export default function ChatbotDrawer({ slides, currentIndex }: ChatbotDrawerPro
     setLoading(true);
 
     try {
-      const res = await fetch(`${EFFECTIVE_BACKEND_URL}/qa`, {
+      const res = await fetch(`${backendUrl}/qa`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

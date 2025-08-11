@@ -5,14 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "@/hooks/use-toast";
-import { EFFECTIVE_BACKEND_URL } from "@/config";
 import type { SlideAsset } from "@/types";
 
 interface UploadSectionProps {
   onResult: (slides: SlideAsset[]) => void;
+  backendUrl: string;
 }
 
-export default function UploadSection({ onResult }: UploadSectionProps) {
+export default function UploadSection({ onResult, backendUrl }: UploadSectionProps) {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -40,7 +40,7 @@ export default function UploadSection({ onResult }: UploadSectionProps) {
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await fetch(`${EFFECTIVE_BACKEND_URL}/generate`, {
+      const response = await fetch(`${backendUrl}/generate`, {
         method: "POST",
         body: formData,
       });
@@ -112,7 +112,7 @@ export default function UploadSection({ onResult }: UploadSectionProps) {
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">
-            Backend: <code className="font-mono">{EFFECTIVE_BACKEND_URL}/generate</code>
+            Backend: <code className="font-mono">{backendUrl}/generate</code>
           </p>
         </div>
       </CardContent>

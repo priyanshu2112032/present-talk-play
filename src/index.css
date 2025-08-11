@@ -17,7 +17,7 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 262 83% 54%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -55,9 +55,9 @@ All colors MUST be HSL.
     --sidebar-ring: 217.2 91.2% 59.8%;
 
     /* Extended brand tokens */
-    --brand: 262 83% 54%;
-    --brand-2: 220 88% 55%;
-    --gradient-primary: linear-gradient(135deg, hsl(var(--brand) / 0.9), hsl(var(--brand-2) / 0.9));
+    --brand: 272 85% 56%;
+    --brand-2: 210 90% 60%;
+    --gradient-primary: linear-gradient(135deg, hsl(var(--brand) / 1), hsl(var(--brand-2) / 1));
     --shadow-elegant: 0 10px 30px -10px hsl(var(--brand) / 0.25);
     --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
    }
